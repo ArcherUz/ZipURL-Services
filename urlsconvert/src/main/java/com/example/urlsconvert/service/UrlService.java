@@ -5,7 +5,7 @@ import com.example.urlsconvert.entity.Url;
 import java.util.List;
 
 public interface UrlService {
-    Url encodeShortUrlByHash(String longUrl);
+    //Url encodeShortUrlByHash(String longUrl);
 
     Url encodeShortUrlByMD5(String longUrl);
 

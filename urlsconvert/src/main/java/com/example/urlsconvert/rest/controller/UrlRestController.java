@@ -26,11 +26,11 @@ public class UrlRestController {
         return urlList;
     }
 
-    @PostMapping
-    public Url encodeLongUrl(@RequestBody UrlRequestDTO urlRequest){
-        Url url = urlService.encodeShortUrlByHash(urlRequest.getLongUrl());
-        return url;
-    }
+//    @PostMapping
+//    public Url encodeLongUrl(@RequestBody UrlRequestDTO urlRequest){
+//        Url url = urlService.encodeShortUrlByHash(urlRequest.getLongUrl());
+//        return url;
+//    }
 
     @PostMapping("/md5")
     public String encodeLongUrlByMD5(@RequestBody UrlRequestDTO urlRequestDTO){

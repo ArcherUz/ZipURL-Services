@@ -26,13 +26,13 @@ public class UrlServiceImpl implements UrlService {
         this.urlRepository = urlRepository;
     }
 
-    @Override
-    @Transactional
-    @Cacheable(value = "urls", key = "#longUrl")
-    public Url encodeShortUrlByHash(String longUrl) {
-        validateUrl(longUrl);
-        return createOrUpdateUrl(longUrl, String.valueOf(longUrl.hashCode()));
-    }
+//    @Override
+//    @Transactional
+//    @Cacheable(value = "urls", key = "#longUrl")
+//    public Url encodeShortUrlByHash(String longUrl) {
+//        validateUrl(longUrl);
+//        return createOrUpdateUrl(longUrl, String.valueOf(longUrl.hashCode()));
+//    }
 
     //MD5
     @Override
