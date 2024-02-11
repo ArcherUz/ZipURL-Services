@@ -3,15 +3,18 @@ package com.example.urlsconvert.entity;
 import jakarta.persistence.*;
 import org.springframework.cglib.core.Local;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 
 @Entity
-public class Url {
+public class Url implements Serializable {
+    private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Column(columnDefinition = "TEXT")
     private String longUrl;
     private String shortUrl;
     private LocalDateTime creationDate;
