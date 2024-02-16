@@ -50,6 +50,7 @@ public class UrlServiceImpl implements UrlService {
                 sb.append(String.format("%02x", b));
             }
             return createOrUpdateUrl(longUrl, sb.toString());
+            // return string short url
 
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
@@ -92,7 +93,7 @@ public class UrlServiceImpl implements UrlService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "urls", key = "#shortUrl")
+    @Cacheable(value = "decodedUrls", key = "#shortUrl")
     public Url decodeLongUrl(String shortUrl) {
         return urlRepository.findByShortUrl(shortUrl)
                 .orElseThrow(() -> new UrlNotFoundException("URL not found for shortURL: " + shortUrl));
@@ -104,7 +105,7 @@ public class UrlServiceImpl implements UrlService {
         }
     }
 
-    @CachePut(value = "urls", key = "#result.shortUrl")
+    //@CachePut(value = "updateUrls", key = "#result.shortUrl")
     private Url createOrUpdateUrl(String longUrl, String shortUrl){
         Url url = urlRepository.findByLongUrl(longUrl);
         if(url == null){
