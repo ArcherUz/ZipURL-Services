@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/urlsconvert.iml" filepath="$PROJECT_DIR$/.idea/urlsconvert.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/ZipURL-Services.iml" filepath="$PROJECT_DIR$/.idea/ZipURL-Services.iml" />
+      <module fileurl="file://$PROJECT_DIR$/urlsconvert/urlsconvert.iml" filepath="$PROJECT_DIR$/urlsconvert/urlsconvert.iml" />
     </modules>
   </component>
 </project>

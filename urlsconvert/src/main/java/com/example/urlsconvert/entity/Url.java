@@ -8,8 +8,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 
 @Entity
-public class Url implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class Url {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -18,11 +17,9 @@ public class Url implements Serializable {
     private String longUrl;
     private String shortUrl;
     private LocalDateTime creationDate;
-    private Long accessCount;
 
 
     public Url() {
-        this.accessCount = 0L;
         this.creationDate = LocalDateTime.now();
     }
 
@@ -63,14 +60,6 @@ public class Url implements Serializable {
         this.creationDate = creationDate;
     }
 
-    public Long getAccessCount() {
-        return accessCount;
-    }
-
-    public void setAccessCount(Long accessCount) {
-        this.accessCount = accessCount;
-    }
-
 
     @Override
     public String toString() {
@@ -79,7 +68,6 @@ public class Url implements Serializable {
                 ", longUrl='" + longUrl + '\'' +
                 ", shortUrl='" + shortUrl + '\'' +
                 ", creationDate=" + creationDate +
-                ", accessCount=" + accessCount +
                 '}';
     }
 }

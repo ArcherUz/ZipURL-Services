@@ -7,11 +7,11 @@ import java.util.List;
 public interface UrlService {
     //Url encodeShortUrlByHash(String longUrl);
 
-    Url encodeShortUrlByMD5(String longUrl);
+    String encodeShortUrlByMD5(String longUrl);
 
-    Url encodeShortUrlByBase64(String longUrl);
+    String encodeShortUrlByBase64(String longUrl);
 
-    Url encodeShortUrlByBase62(String longUrl);
+    String encodeShortUrlByBase62(String longUrl);
     List<Url> getAllUrls();
-    Url decodeLongUrl(String shortUrl);
+    String decodeLongUrl(String shortUrl);
 }

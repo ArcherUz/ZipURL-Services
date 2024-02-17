@@ -34,32 +34,31 @@ public class UrlRestController {
 
     @PostMapping("/md5")
     public String encodeLongUrlByMD5(@RequestBody UrlRequestDTO urlRequestDTO){
-        Url url = urlService.encodeShortUrlByMD5(urlRequestDTO.getLongUrl());
-        String res = "http://zipurl.com/" + url.getShortUrl();
+        String shortUrl = urlService.encodeShortUrlByMD5(urlRequestDTO.getLongUrl());
+        String res = "http://zipurl.com/" + shortUrl;
         return res;
     }
 
     @PostMapping("/base64")
     public String encodeLongUrlByBase64(@RequestBody UrlRequestDTO urlRequestDTO){
-        Url url = urlService.encodeShortUrlByBase64(urlRequestDTO.getLongUrl());
-        String res = "http://zipurl.com/" + url.getShortUrl();
-        return res;
+        String url = urlService.encodeShortUrlByBase64(urlRequestDTO.getLongUrl());
+        return "http://zipurl.com/" + url;
     }
 
     @PostMapping("/base62")
     public String encodeLongUrlByBase62(@RequestBody UrlRequestDTO urlRequestDTO){
-        Url url = urlService.encodeShortUrlByBase62(urlRequestDTO.getLongUrl());
-        String res = "http://zipurl.com/" + url.getShortUrl();
+        String url = urlService.encodeShortUrlByBase62(urlRequestDTO.getLongUrl());
+        String res = "http://zipurl.com/" + url;
         return res;
     }
 
     @GetMapping("/{shortUrl}") //HttpServletResponse response response.sendRedirect
     public void getLongUrl(@PathVariable String shortUrl, HttpServletResponse response) throws IOException {
-        Url url = urlService.decodeLongUrl(shortUrl);
+        String url = urlService.decodeLongUrl(shortUrl);
         if (url == null){
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "URL not found");
         } else {
-            response.sendRedirect(url.getLongUrl());
+            response.sendRedirect(url);
         }
     }
 }

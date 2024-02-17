@@ -16,6 +16,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
+
 @Service
 public class UrlServiceImpl implements UrlService {
 
@@ -26,21 +28,13 @@ public class UrlServiceImpl implements UrlService {
         this.urlRepository = urlRepository;
     }
 
-//    @Override
-//    @Transactional
-//    @Cacheable(value = "urls", key = "#longUrl")
-//    public Url encodeShortUrlByHash(String longUrl) {
-//        validateUrl(longUrl);
-//        return createOrUpdateUrl(longUrl, String.valueOf(longUrl.hashCode()));
-//    }
 
     //MD5
     @Override
     @Transactional
     @Cacheable(value = "urlsByMD5", key= "#longUrl")
-    public Url encodeShortUrlByMD5(String longUrl) {
+    public String encodeShortUrlByMD5(String longUrl) {
         validateUrl(longUrl);
-        Url url = urlRepository.findByLongUrl(longUrl);
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(longUrl.getBytes());
@@ -49,8 +43,8 @@ public class UrlServiceImpl implements UrlService {
             for(byte b : digest){
                 sb.append(String.format("%02x", b));
             }
-            return createOrUpdateUrl(longUrl, sb.toString());
-            // return string short url
+            createOrUpdateUrl(longUrl, sb.toString());
+            return sb.toString();
 
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
@@ -60,19 +54,20 @@ public class UrlServiceImpl implements UrlService {
     @Override
     @Transactional
     @Cacheable(value = "urlsByBase64", key= "#longUrl")
-    public Url encodeShortUrlByBase64(String longUrl) {
+    public String encodeShortUrlByBase64(String longUrl) {
         validateUrl(longUrl);
         ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
         buffer.putInt(longUrl.hashCode());
         //String encoded = Base64.getEncoder().encodeToString(buffer.array());
         String encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(buffer.array());
-        return createOrUpdateUrl(longUrl, encoded);
+        createOrUpdateUrl(longUrl, encoded);
+        return encoded;
     }
 
     @Override
     @Transactional
     @Cacheable(value = "urlsByBase62", key = "#longUrl")
-    public Url encodeShortUrlByBase62(String longUrl) {
+    public String encodeShortUrlByBase62(String longUrl) {
         validateUrl(longUrl);
         int hashCode = Math.abs(longUrl.hashCode());
         final String BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -81,7 +76,8 @@ public class UrlServiceImpl implements UrlService {
             sb.insert(0, BASE62.charAt(hashCode % 62));
             hashCode /= 62;
         }
-        return createOrUpdateUrl(longUrl, sb.toString());
+        createOrUpdateUrl(longUrl, sb.toString());
+        return sb.toString();
     }
 
 
@@ -94,8 +90,9 @@ public class UrlServiceImpl implements UrlService {
     @Override
     @Transactional(readOnly = true)
     @Cacheable(value = "decodedUrls", key = "#shortUrl")
-    public Url decodeLongUrl(String shortUrl) {
+    public String decodeLongUrl(String shortUrl) {
         return urlRepository.findByShortUrl(shortUrl)
+                .map(Url::getLongUrl)
                 .orElseThrow(() -> new UrlNotFoundException("URL not found for shortURL: " + shortUrl));
     }
 
@@ -106,15 +103,10 @@ public class UrlServiceImpl implements UrlService {
     }
 
     //@CachePut(value = "updateUrls", key = "#result.shortUrl")
-    private Url createOrUpdateUrl(String longUrl, String shortUrl){
-        Url url = urlRepository.findByLongUrl(longUrl);
-        if(url == null){
-            url = new Url();
-            url.setLongUrl(longUrl);
-            url.setShortUrl(shortUrl);
-        }
-        url.setAccessCount(url.getAccessCount() + 1);
+    private void createOrUpdateUrl(String longUrl, String shortUrl){
+        Url url = new Url();
+        url.setLongUrl(longUrl);
+        url.setShortUrl(shortUrl);
         urlRepository.save(url);
-        return url;
     }
 }
