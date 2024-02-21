@@ -2,6 +2,9 @@ package com.example.urlsconvert.entity;
 
 import jakarta.persistence.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "customer")
 public class Customer {
@@ -12,18 +15,17 @@ public class Customer {
     private String email;
     @Column(name="password")
     private String password;
-    @Column(name="role")
-    private String role;
 
-//    public Customer(){
-//
-//    }
-//
-//    public Customer(String email, String password, String role) {
-//        this.email = email;
-//        this.password = password;
-//        this.role = role;
-//    }
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "customer_authorities",
+            joinColumns = @JoinColumn(name = "customer_id"),
+            inverseJoinColumns = @JoinColumn(name = "authority_id"))
+    private Set<Authority> authorities = new HashSet<>();
+
+    public Customer(){
+
+    }
+
 
     public int getId() {
         return id;
@@ -49,11 +51,11 @@ public class Customer {
         this.password = password;
     }
 
-    public String getRole() {
-        return role;
+    public Set<Authority> getAuthorities() {
+        return authorities;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setAuthorities(Set<Authority> authorities) {
+        this.authorities = authorities;
     }
 }

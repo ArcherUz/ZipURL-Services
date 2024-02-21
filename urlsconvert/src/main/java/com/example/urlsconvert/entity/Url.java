@@ -16,11 +16,10 @@ public class Url {
     @Column(columnDefinition = "TEXT")
     private String longUrl;
     private String shortUrl;
-    private LocalDateTime creationDate;
 
 
     public Url() {
-        this.creationDate = LocalDateTime.now();
+
     }
 
     public Url(String longUrl, String shortUrl) {
@@ -52,22 +51,5 @@ public class Url {
         this.shortUrl = shortUrl;
     }
 
-    public LocalDateTime getCreationDate() {
-        return creationDate;
-    }
 
-    public void setCreationDate(LocalDateTime creationDate) {
-        this.creationDate = creationDate;
-    }
-
-
-    @Override
-    public String toString() {
-        return "Url{" +
-                "id=" + id +
-                ", longUrl='" + longUrl + '\'' +
-                ", shortUrl='" + shortUrl + '\'' +
-                ", creationDate=" + creationDate +
-                '}';
-    }
 }
