@@ -1,6 +1,7 @@
 package com.example.urlsconvert.entity;
 
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -2,10 +2,16 @@ package com.example.urlsconvert.rest.controller;
 
 import com.example.urlsconvert.entity.Customer;
 import com.example.urlsconvert.dao.CustomerRepository;
+import com.example.urlsconvert.service.JWTTokenService;
 import com.example.urlsconvert.service.RegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,7 +22,6 @@ public class LoginController {
     @Autowired
     //private CustomerRepository customerRepository;
     private RegistrationService registrationService;
-
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -27,6 +32,8 @@ public class LoginController {
             customer.setPassword(hashPwd);
             Customer savedCustomer = registrationService.registerNewCustomer(customer.getEmail(), customer.getPassword());
             if(savedCustomer != null && savedCustomer.getId() > 0){
+                //String jwt = jwtTokenService.generateToken(customer.getEmail(), savedCustomer.getAuthorities())
+
                 return ResponseEntity
                         .status(HttpStatus.CREATED)
                         .body("Given user details are successfully registered");
