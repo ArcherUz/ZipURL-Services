@@ -5,6 +5,8 @@ import com.example.urlsconvert.dao.UrlRepository;
 import com.example.urlsconvert.entity.Url;
 import com.example.urlsconvert.rest.UrlNotFoundException;
 import com.example.urlsconvert.service.UrlService;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -17,6 +19,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Service
 public class UrlServiceImpl implements UrlService {
@@ -27,6 +30,20 @@ public class UrlServiceImpl implements UrlService {
     public UrlServiceImpl(UrlRepository urlRepository){
         this.urlRepository = urlRepository;
     }
+
+    public String getUrlTitle(String url){
+        String title = "";
+        try{
+            Document doc = Jsoup.connect(url).get();
+            title = doc.select("head > title").text();
+        } catch (Exception ex){
+            title = ex.toString();
+        }
+        return title;
+    }
+
+    //imgSrc="google.com/favicon.ico"
+
 
 
     //MD5
@@ -44,7 +61,8 @@ public class UrlServiceImpl implements UrlService {
                 sb.append(String.format("%02x", b));
             }
             createOrUpdateUrl(longUrl, sb.toString());
-            return sb.toString();
+            String title = getUrlTitle(longUrl);
+            return sb.toString() + " title:" + title;
 
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
