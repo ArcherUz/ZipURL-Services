@@ -17,9 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,7 +31,7 @@ public class UrlServiceImpl implements UrlService {
         this.urlRepository = urlRepository;
     }
 
-    public String getUrlTitle(String url){
+    private String getUrlTitle(String url){
         String title = "";
         try{
             Document doc = Jsoup.connect(url).get();
@@ -45,7 +43,7 @@ public class UrlServiceImpl implements UrlService {
     }
 
     //imgSrc="google.com/favicon.ico"
-    public String getUrlAvatarSrc(String url){
+    private String getUrlAvatarSrc(String url){
         String regex = "^(https?://[^/]+)";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(url);
@@ -56,13 +54,21 @@ public class UrlServiceImpl implements UrlService {
         }
     }
 
+    private Map<String, String> buildResponse(String encodeUrl, String title, String avatar){
+        Map<String, String> response = new HashMap<>();
+        response.put("shortURL", "http://zipurl.com/" +encodeUrl);
+        response.put("Title", title);
+        response.put("Avatar", avatar);
+        return response;
+    }
+
 
 
     //MD5
     @Override
     @Transactional
     @Cacheable(value = "urlsByMD5", key= "#longUrl")
-    public String encodeShortUrlByMD5(String longUrl) {
+    public Map<String, String> encodeShortUrlByMD5(String longUrl) {
         validateUrl(longUrl);
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
@@ -75,10 +81,7 @@ public class UrlServiceImpl implements UrlService {
             createOrUpdateUrl(longUrl, sb.toString());
             String title = getUrlTitle(longUrl);
             String avatar = getUrlAvatarSrc(longUrl);
-            return "{" + "shortURL:" + "http://zipurl.com/" + sb.toString() +
-                    ", Title:" + title +
-                    ", Avatar:" + avatar +
-                    "}";
+            return buildResponse(sb.toString(), title, avatar);
 
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
@@ -88,7 +91,7 @@ public class UrlServiceImpl implements UrlService {
     @Override
     @Transactional
     @Cacheable(value = "urlsByBase64", key= "#longUrl")
-    public String encodeShortUrlByBase64(String longUrl) {
+    public Map<String, String> encodeShortUrlByBase64(String longUrl) {
         validateUrl(longUrl);
         ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
         buffer.putInt(longUrl.hashCode());
@@ -97,16 +100,13 @@ public class UrlServiceImpl implements UrlService {
         createOrUpdateUrl(longUrl, encoded);
         String title = getUrlTitle(longUrl);
         String avatar = getUrlAvatarSrc(longUrl);
-        return "{" + "shortURL:" + "http://zipurl.com/" + encoded +
-                ", Title:" + title +
-                ", Avatar:" + avatar +
-                "}";
+        return buildResponse(encoded, title, avatar);
     }
 
     @Override
     @Transactional
     @Cacheable(value = "urlsByBase62", key = "#longUrl")
-    public String encodeShortUrlByBase62(String longUrl) {
+    public Map<String, String> encodeShortUrlByBase62(String longUrl) {
         validateUrl(longUrl);
         int hashCode = Math.abs(longUrl.hashCode());
         final String BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -119,10 +119,7 @@ public class UrlServiceImpl implements UrlService {
 
         String title = getUrlTitle(longUrl);
         String avatar = getUrlAvatarSrc(longUrl);
-        return "{" + "shortURL:" + "http://zipurl.com/" + sb.toString() +
-                ", Title:" + title +
-                ", Avatar:" + avatar +
-                "}";
+        return buildResponse(sb.toString(), title, avatar);
     }
 
 

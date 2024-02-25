@@ -5,10 +5,12 @@ import com.example.urlsconvert.service.UrlRequestDTO;
 import com.example.urlsconvert.service.UrlService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/urls")
@@ -33,23 +35,21 @@ public class UrlRestController {
 //    }
 
     @PostMapping("/md5")
-    public String encodeLongUrlByMD5(@RequestBody UrlRequestDTO urlRequestDTO){
-        String shortUrl = urlService.encodeShortUrlByMD5(urlRequestDTO.getLongUrl());
-        String res =  shortUrl;
-        return res;
+    public ResponseEntity<Map<String, String>> encodeLongUrlByMD5(@RequestBody UrlRequestDTO urlRequestDTO){
+        Map<String, String> result = urlService.encodeShortUrlByMD5(urlRequestDTO.getLongUrl());
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/base64")
-    public String encodeLongUrlByBase64(@RequestBody UrlRequestDTO urlRequestDTO){
-        String url = urlService.encodeShortUrlByBase64(urlRequestDTO.getLongUrl());
-        return "http://zipurl.com/" + url;
+    public ResponseEntity<Map<String, String>> encodeLongUrlByBase64(@RequestBody UrlRequestDTO urlRequestDTO){
+        Map<String, String> result = urlService.encodeShortUrlByBase64(urlRequestDTO.getLongUrl());
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/base62")
-    public String encodeLongUrlByBase62(@RequestBody UrlRequestDTO urlRequestDTO){
-        String url = urlService.encodeShortUrlByBase62(urlRequestDTO.getLongUrl());
-        String res = "http://zipurl.com/" + url;
-        return res;
+    public ResponseEntity<Map<String, String>> encodeLongUrlByBase62(@RequestBody UrlRequestDTO urlRequestDTO){
+        Map<String, String> result = urlService.encodeShortUrlByBase62(urlRequestDTO.getLongUrl());
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{shortUrl}") //HttpServletResponse response response.sendRedirect
