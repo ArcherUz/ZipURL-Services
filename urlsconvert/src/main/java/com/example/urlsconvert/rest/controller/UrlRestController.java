@@ -35,7 +35,7 @@ public class UrlRestController {
     @PostMapping("/md5")
     public String encodeLongUrlByMD5(@RequestBody UrlRequestDTO urlRequestDTO){
         String shortUrl = urlService.encodeShortUrlByMD5(urlRequestDTO.getLongUrl());
-        String res = "http://zipurl.com/" + shortUrl;
+        String res =  shortUrl;
         return res;
     }
 

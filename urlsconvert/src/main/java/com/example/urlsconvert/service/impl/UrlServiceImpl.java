@@ -20,6 +20,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
@@ -44,6 +45,16 @@ public class UrlServiceImpl implements UrlService {
     }
 
     //imgSrc="google.com/favicon.ico"
+    public String getUrlAvatarSrc(String url){
+        String regex = "^(https?://[^/]+)";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(url);
+        if(matcher.find()){
+            return matcher.group(1) + "/favicon.ico";
+        } else {
+            return "";
+        }
+    }
 
 
 
@@ -63,7 +74,11 @@ public class UrlServiceImpl implements UrlService {
             }
             createOrUpdateUrl(longUrl, sb.toString());
             String title = getUrlTitle(longUrl);
-            return sb.toString() + " title:" + title;
+            String avatar = getUrlAvatarSrc(longUrl);
+            return "{" + "shortURL:" + "http://zipurl.com/" + sb.toString() +
+                    ", Title:" + title +
+                    ", Avatar:" + avatar +
+                    "}";
 
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
@@ -80,7 +95,12 @@ public class UrlServiceImpl implements UrlService {
         //String encoded = Base64.getEncoder().encodeToString(buffer.array());
         String encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(buffer.array());
         createOrUpdateUrl(longUrl, encoded);
-        return encoded;
+        String title = getUrlTitle(longUrl);
+        String avatar = getUrlAvatarSrc(longUrl);
+        return "{" + "shortURL:" + "http://zipurl.com/" + encoded +
+                ", Title:" + title +
+                ", Avatar:" + avatar +
+                "}";
     }
 
     @Override
@@ -96,7 +116,13 @@ public class UrlServiceImpl implements UrlService {
             hashCode /= 62;
         }
         createOrUpdateUrl(longUrl, sb.toString());
-        return sb.toString();
+
+        String title = getUrlTitle(longUrl);
+        String avatar = getUrlAvatarSrc(longUrl);
+        return "{" + "shortURL:" + "http://zipurl.com/" + sb.toString() +
+                ", Title:" + title +
+                ", Avatar:" + avatar +
+                "}";
     }
 
 
