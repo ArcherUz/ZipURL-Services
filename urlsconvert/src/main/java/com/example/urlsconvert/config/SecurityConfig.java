@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/urls").authenticated()
                         .requestMatchers("/api/urls/**").authenticated()
-                        .requestMatchers("/register").permitAll()
+                        .requestMatchers("/register","/login").permitAll()
                 )
                 .formLogin().disable() // Disabling form login as we use JWT
                 .httpBasic().disable() // Disabling basic auth as well

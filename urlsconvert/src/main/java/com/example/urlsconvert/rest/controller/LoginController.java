@@ -7,7 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,5 +52,19 @@ public class LoginController {
         }
 
         return ResponseEntity.badRequest().body("Failed to register");
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> loginUser(@RequestBody Customer loginCustomer){
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginCustomer.getEmail(), loginCustomer.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            final String jwtToken = jwtUtil.generateToken(loginCustomer.getEmail());
+
+            return ResponseEntity.ok("Token: " + jwtToken);
+        } catch (BadCredentialsException ex){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect email or password");
+        }
     }
 }
