@@ -71,4 +71,8 @@ public class Customer {
     public void setUrls(Set<Url> urls) {
         this.urls = urls;
     }
+
+    public void addUrls(Url url){
+        this.urls.add(url);
+    }
 }
