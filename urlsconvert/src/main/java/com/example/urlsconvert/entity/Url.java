@@ -18,6 +18,10 @@ public class Url {
     private String shortUrl;
     private LocalDateTime creationDate;
 
+    private String title;
+    private String avatar;
+
+
 
     public Url() {
         this.creationDate = LocalDateTime.now();
@@ -27,6 +31,7 @@ public class Url {
         this.longUrl = longUrl;
         this.shortUrl = shortUrl;
     }
+
 
     public Long getId() {
         return id;
@@ -60,6 +65,21 @@ public class Url {
         this.creationDate = creationDate;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
 
     @Override
     public String toString() {

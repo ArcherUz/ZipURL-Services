@@ -2,6 +2,9 @@ package com.example.urlsconvert.entity;
 
 import jakarta.persistence.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "customer")
 public class Customer {
@@ -14,6 +17,10 @@ public class Customer {
     private String password;
     @Column(name="role")
     private String role;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id")
+    private Set<Url> urls = new HashSet<>();
 
 //    public Customer(){
 //
@@ -55,5 +62,17 @@ public class Customer {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public Set<Url> getUrls() {
+        return urls;
+    }
+
+    public void setUrls(Set<Url> urls) {
+        this.urls = urls;
+    }
+
+    public void addUrls(Url url){
+        this.urls.add(url);
     }
 }

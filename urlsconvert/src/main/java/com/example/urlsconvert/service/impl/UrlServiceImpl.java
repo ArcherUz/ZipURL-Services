@@ -1,7 +1,9 @@
 package com.example.urlsconvert.service.impl;
 
 import com.example.urlsconvert.config.UrlValidation;
+import com.example.urlsconvert.dao.CustomerRepository;
 import com.example.urlsconvert.dao.UrlRepository;
+import com.example.urlsconvert.entity.Customer;
 import com.example.urlsconvert.entity.Url;
 import com.example.urlsconvert.rest.UrlNotFoundException;
 import com.example.urlsconvert.service.UrlService;
@@ -11,15 +13,16 @@ import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
@@ -32,7 +35,22 @@ public class UrlServiceImpl implements UrlService {
         this.urlRepository = urlRepository;
     }
 
-    public String getUrlTitle(String url){
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    private Customer getCustomer(){
+        Customer customer = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Optional<Customer> customerOptional = customerRepository.findByEmail(email).stream().findFirst();
+        if(!customerOptional.isPresent()){
+            return customer;
+        }
+        customer = customerOptional.get();
+        return customer;
+    }
+
+    private String getUrlTitle(String url){
         String title = "";
         try{
             Document doc = Jsoup.connect(url).get();
@@ -44,6 +62,25 @@ public class UrlServiceImpl implements UrlService {
     }
 
     //imgSrc="google.com/favicon.ico"
+    private String getUrlAvatarSrc(String url){
+        String regex = "^(https?://[^/]+)";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(url);
+        if(matcher.find()){
+            return matcher.group(1) + "/favicon.ico";
+        } else {
+            return "";
+        }
+    }
+
+    private Map<String, String> buildResponse(String longUrl,String encodeUrl, String title, String avatar){
+        Map<String, String> response = new HashMap<>();
+        response.put("longURL", longUrl);
+        response.put("shortURL", "http://zipurl.com/" +encodeUrl);
+        response.put("Title", title);
+        response.put("Avatar", avatar);
+        return response;
+    }
 
 
 
@@ -51,8 +88,9 @@ public class UrlServiceImpl implements UrlService {
     @Override
     @Transactional
     @Cacheable(value = "urlsByMD5", key= "#longUrl")
-    public String encodeShortUrlByMD5(String longUrl) {
+    public Map<String, String> encodeShortUrlByMD5(String longUrl) {
         validateUrl(longUrl);
+        Customer customer = getCustomer();
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(longUrl.getBytes());
@@ -61,9 +99,16 @@ public class UrlServiceImpl implements UrlService {
             for(byte b : digest){
                 sb.append(String.format("%02x", b));
             }
-            createOrUpdateUrl(longUrl, sb.toString());
+
             String title = getUrlTitle(longUrl);
-            return sb.toString() + " title:" + title;
+            String avatar = getUrlAvatarSrc(longUrl);
+            Url url = createOrUpdateUrl(longUrl, sb.toString(), title, avatar);
+
+            if (customer != null){
+                customer.addUrls(url);
+                customerRepository.save(customer);
+            }
+            return buildResponse(longUrl, sb.toString(), title, avatar);
 
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
@@ -73,20 +118,27 @@ public class UrlServiceImpl implements UrlService {
     @Override
     @Transactional
     @Cacheable(value = "urlsByBase64", key= "#longUrl")
-    public String encodeShortUrlByBase64(String longUrl) {
+    public Map<String, String> encodeShortUrlByBase64(String longUrl) {
         validateUrl(longUrl);
         ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
         buffer.putInt(longUrl.hashCode());
-        //String encoded = Base64.getEncoder().encodeToString(buffer.array());
         String encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(buffer.array());
-        createOrUpdateUrl(longUrl, encoded);
-        return encoded;
+
+        String title = getUrlTitle(longUrl);
+        String avatar = getUrlAvatarSrc(longUrl);
+        Url url = createOrUpdateUrl(longUrl, encoded, title, avatar);
+        Customer customer = getCustomer();
+        if(customer!=null){
+            customer.addUrls(url);
+            customerRepository.save(customer);
+        }
+        return buildResponse(longUrl, encoded, title, avatar);
     }
 
     @Override
     @Transactional
     @Cacheable(value = "urlsByBase62", key = "#longUrl")
-    public String encodeShortUrlByBase62(String longUrl) {
+    public Map<String, String> encodeShortUrlByBase62(String longUrl) {
         validateUrl(longUrl);
         int hashCode = Math.abs(longUrl.hashCode());
         final String BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -95,8 +147,16 @@ public class UrlServiceImpl implements UrlService {
             sb.insert(0, BASE62.charAt(hashCode % 62));
             hashCode /= 62;
         }
-        createOrUpdateUrl(longUrl, sb.toString());
-        return sb.toString();
+
+        String title = getUrlTitle(longUrl);
+        String avatar = getUrlAvatarSrc(longUrl);
+        Url url = createOrUpdateUrl(longUrl, sb.toString(), title, avatar);
+        Customer customer = getCustomer();
+        if(customer!=null){
+            customer.addUrls(url);
+            customerRepository.save(customer);
+        }
+        return buildResponse(longUrl, sb.toString(), title, avatar);
     }
 
 
@@ -122,10 +182,13 @@ public class UrlServiceImpl implements UrlService {
     }
 
     //@CachePut(value = "updateUrls", key = "#result.shortUrl")
-    private void createOrUpdateUrl(String longUrl, String shortUrl){
+    private Url createOrUpdateUrl(String longUrl, String shortUrl, String title, String avatar){
         Url url = new Url();
         url.setLongUrl(longUrl);
         url.setShortUrl(shortUrl);
+        url.setTitle(title);
+        url.setAvatar(avatar);
         urlRepository.save(url);
+        return url;
     }
 }
