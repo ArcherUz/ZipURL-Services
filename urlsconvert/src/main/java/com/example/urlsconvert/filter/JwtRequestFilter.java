@@ -1,5 +1,6 @@
 package com.example.urlsconvert.filter;
 
+import com.example.urlsconvert.rest.InvalidJwtTokenException;
 import com.example.urlsconvert.utils.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -32,18 +33,31 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
-            username = jwtUtil.getUsernameFromToken(jwt);
+            try{
+                username = jwtUtil.getUsernameFromToken(jwt);
+            } catch (Exception ex){
+                throw new InvalidJwtTokenException("JWT token is invalid or expired.");
+            }
+
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+            try{
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+                if(!jwtUtil.validateToken(jwt, userDetails.getUsername())){
+                    throw new InvalidJwtTokenException("JWT token is invalid or expired.");
+                }
 
-            if (jwtUtil.validateToken(jwt, userDetails.getUsername())) {
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                if (jwtUtil.validateToken(jwt, userDetails.getUsername())) {
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            } catch (Exception ex){
+                throw new InvalidJwtTokenException("JWT token is invalid or expired.");
             }
+
         }
         filterChain.doFilter(request, response);
     }

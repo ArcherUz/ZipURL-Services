@@ -67,6 +67,7 @@ public class UrlRestController {
         String url = urlService.decodeLongUrl(shortUrl);
         if (url == null){
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "URL not found");
+
         } else {
             response.sendRedirect(url);
         }

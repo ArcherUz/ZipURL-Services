@@ -1,5 +1,7 @@
 package com.example.urlsconvert.config;
 
+import com.example.urlsconvert.filter.FilterChainExceptionHandler;
+import com.example.urlsconvert.filter.JwtAuthenticationEntryPoint;
 import com.example.urlsconvert.filter.JwtRequestFilter;
 import com.example.urlsconvert.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,10 @@ public class SecurityConfig {
 
     @Autowired
     private UserDetailsService userDetailsService;
+    @Autowired
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    @Autowired
+    private FilterChainExceptionHandler filterChainExceptionHandler;
 
     // SecurityFilterChain bean definition
     @Bean
@@ -41,15 +47,19 @@ public class SecurityConfig {
         http.csrf().disable()
                 .cors().configurationSource(corsConfigurationSource()).and()
                 .authorizeHttpRequests(auth -> auth
+
                         .requestMatchers("/api/urls").authenticated()
                         .requestMatchers("/api/urls/**").authenticated()
                         .requestMatchers("/register","/login","/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
                 )
                 .formLogin().disable() // Disabling form login as we use JWT
                 .httpBasic().disable() // Disabling basic auth as well
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); // No session will be created
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // No session will be created
+                .and()
+                .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint);
 
         // Add JWT request filter
+        http.addFilterBefore(filterChainExceptionHandler, UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(jwtRequestFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

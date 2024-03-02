@@ -32,7 +32,7 @@ public class RedisConfig {
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofHours(1)); // Set default expiration to 1 hour
+                .entryTtl(Duration.ofMinutes(30)); // Set default expiration to 1 hour
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(config)
