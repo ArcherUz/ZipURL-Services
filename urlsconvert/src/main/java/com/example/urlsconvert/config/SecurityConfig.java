@@ -44,23 +44,19 @@ public class SecurityConfig {
     // SecurityFilterChain bean definition
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-                .cors().configurationSource(corsConfigurationSource()).and()
+        http.csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-
-                        .requestMatchers("/api/urls").authenticated()
-                        .requestMatchers("/api/urls/**").authenticated()
+                        .requestMatchers("/api/urls", "/api/urls/**").authenticated()
                         .requestMatchers("/register","/login","/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
                 )
-                .formLogin().disable() // Disabling form login as we use JWT
-                .httpBasic().disable() // Disabling basic auth as well
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // No session will be created
-                .and()
-                .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint);
-
-        // Add JWT request filter
-        http.addFilterBefore(filterChainExceptionHandler, UsernamePasswordAuthenticationFilter.class);
-        http.addFilterBefore(jwtRequestFilter(), UsernamePasswordAuthenticationFilter.class);
+//                .formLogin().disable() // Disabling form login as we use JWT
+//                .httpBasic().disable() // Disabling basic auth as well
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                // Add JWT request filter
+                .addFilterBefore(filterChainExceptionHandler, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtRequestFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -80,11 +76,14 @@ public class SecurityConfig {
     // AuthenticationManager bean definition using new implementation method
     @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
     public AuthenticationManager authenticationManagerBean(HttpSecurity http) throws Exception {
-        return http.getSharedObject(AuthenticationManagerBuilder.class)
+        AuthenticationManagerBuilder authManagerBuilder =  http.getSharedObject(AuthenticationManagerBuilder.class);
+        authManagerBuilder
                 .userDetailsService(userDetailsService)
-                .passwordEncoder(passwordEncoder())
-                .and()
-                .build();
+                .passwordEncoder(passwordEncoder());
+        return authManagerBuilder.build();
+//                .and()
+//                .build();
+
     }
 
     @Bean
