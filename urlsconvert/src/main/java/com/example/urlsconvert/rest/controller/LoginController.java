@@ -47,7 +47,7 @@ public class LoginController {
     public ResponseEntity<String> registerUser(@RequestBody Customer customer){
         if(customer.getEmail() == null || customer.getEmail().isEmpty() || !customerRepository.findByEmail(customer.getEmail()).isEmpty()){
             //throw new RegistrationException("Email is already in use or invalid.");
-            throw new RegistrationException("{\"error\": \"" + "Email is already in use or invalid." + "\"}");
+            throw new RegistrationException("Email is already in use or invalid.");
         }
         if(customer.getRole() == null || customer.getRole().trim().isEmpty()){
             customer.setRole("ROLE_USER");
