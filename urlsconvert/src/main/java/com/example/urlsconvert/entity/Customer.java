@@ -2,7 +2,9 @@ package com.example.urlsconvert.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -11,26 +13,19 @@ public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @Column(name="email")
+    @Column(nullable = false, unique = true, length = 255)
     private String email;
-    @Column(name="password")
+    @Column(nullable = false, length = 255)
     private String password;
-    @Column(name="role")
+    @Column(nullable = false, length = 255)
     private String role;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id")
-    private Set<Url> urls = new HashSet<>();
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "customer_urls",
+            joinColumns = @JoinColumn(name = "customer_id"),
+            inverseJoinColumns = @JoinColumn(name = "url_id"))
+    private Set<UrlLongToShort> urls = new HashSet<>();
 
-//    public Customer(){
-//
-//    }
-//
-//    public Customer(String email, String password, String role) {
-//        this.email = email;
-//        this.password = password;
-//        this.role = role;
-//    }
 
     public int getId() {
         return id;
@@ -64,15 +59,15 @@ public class Customer {
         this.role = role;
     }
 
-    public Set<Url> getUrls() {
+    public Set<UrlLongToShort> getUrls() {
         return urls;
     }
 
-    public void setUrls(Set<Url> urls) {
+    public void setUrls(Set<UrlLongToShort> urls) {
         this.urls = urls;
     }
 
-    public void addUrls(Url url){
-        this.urls.add(url);
+    public void addUrl(UrlLongToShort urlLongToShort){
+        this.urls.add(urlLongToShort);
     }
 }

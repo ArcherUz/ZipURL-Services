@@ -36,12 +36,6 @@ test {
     useJUnitPlatform()
 }
 
-//flyway {
-//    url = 'jdbc:postgresql://localhost:5432/urlsdatabase'
-//    user = 'postgres'
-//    password = 'admin'
-//    locations = ['classpath:db/migration']
-//}
 flyway{
     url = 'jdbc:postgresql://localhost:5432/urlsdatabase'
     user = 'postgres'

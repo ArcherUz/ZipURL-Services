@@ -22,23 +22,19 @@ public class UserDetails implements UserDetailsService {
 
     @Override
     public org.springframework.security.core.userdetails.UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        List<Customer> customers = customerRepository.findByEmail(username);
-        if(customers.isEmpty()){
-            throw new UsernameNotFoundException("User detail not found for the user : "+ username);
+        Customer customer = customerRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("User detail not found for the user : "+ username));
 
-        } else {
-            Customer customer = customers.get(0);
-            String password = customer.getPassword();
-            List<GrantedAuthority> authorityList = new ArrayList<>();
-            authorityList.add(new SimpleGrantedAuthority(customers.get(0).getRole()));
-            String role = customer.getRole();
-            if (role == null || role.trim().isEmpty()) {
-                role = "ROLE_USER"; // Default role
-            }
-            authorityList.add(new SimpleGrantedAuthority(role));
-
-            return new User(username, password, authorityList);
+        String password = customer.getPassword();
+        List<GrantedAuthority> authorityList = new ArrayList<>();
+        authorityList.add(new SimpleGrantedAuthority(customer.getRole()));
+        String role = customer.getRole();
+        if (role == null || role.trim().isEmpty()) {
+            role = "ROLE_USER"; // Default role
         }
+        authorityList.add(new SimpleGrantedAuthority(role));
+
+        return new User(username, password, authorityList);
+
     }
 //    @Override
 //    public org.springframework.security.core.userdetails.UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

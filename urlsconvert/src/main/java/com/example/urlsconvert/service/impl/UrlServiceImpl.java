@@ -2,16 +2,18 @@ package com.example.urlsconvert.service.impl;
 
 import com.example.urlsconvert.config.UrlValidation;
 import com.example.urlsconvert.dao.CustomerRepository;
-import com.example.urlsconvert.dao.UrlRepository;
+import com.example.urlsconvert.dao.UrlLongToShortRepository;
 import com.example.urlsconvert.entity.Customer;
-import com.example.urlsconvert.entity.Url;
+import com.example.urlsconvert.entity.UrlLongToShort;
+import com.example.urlsconvert.rest.CustomAuthenticationException;
+
 import com.example.urlsconvert.rest.UrlNotFoundException;
 import com.example.urlsconvert.service.UrlService;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CachePut;
+
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,26 +30,18 @@ import java.util.regex.Pattern;
 @Service
 public class UrlServiceImpl implements UrlService {
 
-    private UrlRepository urlRepository;
-
     @Autowired
-    public UrlServiceImpl(UrlRepository urlRepository){
-        this.urlRepository = urlRepository;
-    }
+    private UrlLongToShortRepository urlLongToShortRepository;
 
     @Autowired
     private CustomerRepository customerRepository;
 
     private Customer getCustomer(){
-        Customer customer = null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
-        Optional<Customer> customerOptional = customerRepository.findByEmail(email).stream().findFirst();
-        if(!customerOptional.isPresent()){
-            return customer;
-        }
-        customer = customerOptional.get();
+        Customer customer = customerRepository.findByEmail(email).orElseThrow(() -> new CustomAuthenticationException("Customer email does not register"));
         return customer;
+
     }
 
     private String getUrlTitle(String url){
@@ -83,7 +77,6 @@ public class UrlServiceImpl implements UrlService {
     }
 
 
-
     //MD5
     @Override
     @Transactional
@@ -102,12 +95,8 @@ public class UrlServiceImpl implements UrlService {
 
             String title = getUrlTitle(longUrl);
             String avatar = getUrlAvatarSrc(longUrl);
-            Url url = createOrUpdateUrl(longUrl, sb.toString(), title, avatar);
+            UrlLongToShort url = createOrUpdateUrl(longUrl, sb.toString(), title, avatar);
 
-            if (customer != null){
-                customer.addUrls(url);
-                customerRepository.save(customer);
-            }
             return buildResponse(longUrl, sb.toString(), title, avatar);
 
         } catch (NoSuchAlgorithmException e) {
@@ -126,12 +115,8 @@ public class UrlServiceImpl implements UrlService {
 
         String title = getUrlTitle(longUrl);
         String avatar = getUrlAvatarSrc(longUrl);
-        Url url = createOrUpdateUrl(longUrl, encoded, title, avatar);
-        Customer customer = getCustomer();
-        if(customer!=null){
-            customer.addUrls(url);
-            customerRepository.save(customer);
-        }
+        UrlLongToShort url = createOrUpdateUrl(longUrl, encoded, title, avatar);
+
         return buildResponse(longUrl, encoded, title, avatar);
     }
 
@@ -150,29 +135,33 @@ public class UrlServiceImpl implements UrlService {
 
         String title = getUrlTitle(longUrl);
         String avatar = getUrlAvatarSrc(longUrl);
-        Url url = createOrUpdateUrl(longUrl, sb.toString(), title, avatar);
-        Customer customer = getCustomer();
-        if(customer!=null){
-            customer.addUrls(url);
-            customerRepository.save(customer);
-        }
+        UrlLongToShort url = createOrUpdateUrl(longUrl, sb.toString(), title, avatar);
         return buildResponse(longUrl, sb.toString(), title, avatar);
     }
 
 
     @Override
-    @Transactional(readOnly = true)
-    public List<Url> getAllUrls() {
-        return urlRepository.findAll();
+    public Set<Map<String, String>> getUrlHistoryByEmail() {
+        Customer customer = getCustomer();
+        Set<Map<String, String>> urls = new HashSet<>();
+        for(UrlLongToShort url : customer.getUrls()){
+            Map<String, String> urlResponse = buildResponse(url.getLongUrl(), url.getShortUrl(), url.getTitle(), url.getAvatar());
+            urls.add(urlResponse);
+        }
+        return urls;
+
     }
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(value = "decodedUrls", key = "#shortUrl")
     public String decodeLongUrl(String shortUrl) {
-        return urlRepository.findByShortUrl(shortUrl)
-                .map(Url::getLongUrl)
-                .orElseThrow(() -> new UrlNotFoundException("URL not found for shortURL: " + shortUrl));
+        Optional<UrlLongToShort> urlOptional = urlLongToShortRepository.findByShortUrl(shortUrl);
+        if(!urlOptional.isPresent()){
+            throw new UrlNotFoundException("Short url does not found: " + shortUrl);
+        }
+        return urlOptional.get().getLongUrl();
+
     }
 
     public void validateUrl(String longUrl){
@@ -181,14 +170,18 @@ public class UrlServiceImpl implements UrlService {
         }
     }
 
-    //@CachePut(value = "updateUrls", key = "#result.shortUrl")
-    private Url createOrUpdateUrl(String longUrl, String shortUrl, String title, String avatar){
-        Url url = new Url();
+    private UrlLongToShort createOrUpdateUrl(String longUrl, String shortUrl, String title, String avatar){
+        UrlLongToShort url = new UrlLongToShort();
         url.setLongUrl(longUrl);
         url.setShortUrl(shortUrl);
         url.setTitle(title);
         url.setAvatar(avatar);
-        urlRepository.save(url);
+
+        Customer customer = getCustomer();
+        url.addCustomer(customer);
+        urlLongToShortRepository.save(url);
+
+
         return url;
     }
 }
