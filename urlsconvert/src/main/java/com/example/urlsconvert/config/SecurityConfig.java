@@ -47,8 +47,8 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/register","/login","/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**","/api/urls/{shortUrl}").permitAll()
                         .requestMatchers("/api/urls", "/api/urls/**").authenticated()
-                        .requestMatchers("/register","/login","/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
                 )
 //                .formLogin().disable() // Disabling form login as we use JWT
 //                .httpBasic().disable() // Disabling basic auth as well

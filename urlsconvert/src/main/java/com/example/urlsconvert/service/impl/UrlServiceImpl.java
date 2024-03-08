@@ -50,7 +50,7 @@ public class UrlServiceImpl implements UrlService {
             Document doc = Jsoup.connect(url).get();
             title = doc.select("head > title").text();
         } catch (Exception ex){
-            title = ex.toString();
+            title = "";
         }
         return title;
     }
@@ -70,7 +70,7 @@ public class UrlServiceImpl implements UrlService {
     private Map<String, String> buildResponse(String longUrl,String encodeUrl, String title, String avatar){
         Map<String, String> response = new HashMap<>();
         response.put("longURL", longUrl);
-        response.put("shortURL", "http://zipurl.com/" +encodeUrl);
+        response.put("shortURL", "http://localhost:8080/api/urls/" +encodeUrl);
         response.put("Title", title);
         response.put("Avatar", avatar);
         return response;
@@ -156,7 +156,7 @@ public class UrlServiceImpl implements UrlService {
     @Transactional(readOnly = true)
     @Cacheable(value = "decodedUrls", key = "#shortUrl")
     public String decodeLongUrl(String shortUrl) {
-        Optional<UrlLongToShort> urlOptional = urlLongToShortRepository.findByShortUrl(shortUrl);
+        Optional<UrlLongToShort> urlOptional = urlLongToShortRepository.findByShortUrl(shortUrl).stream().findFirst();
         if(!urlOptional.isPresent()){
             throw new UrlNotFoundException("Short url does not found: " + shortUrl);
         }
