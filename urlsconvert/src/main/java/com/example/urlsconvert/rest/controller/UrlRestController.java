@@ -1,21 +1,16 @@
 package com.example.urlsconvert.rest.controller;
 
 import com.example.urlsconvert.dao.CustomerRepository;
-import com.example.urlsconvert.entity.Customer;
-import com.example.urlsconvert.entity.Url;
+import com.example.urlsconvert.entity.UrlLongToShort;
 import com.example.urlsconvert.service.UrlRequestDTO;
 import com.example.urlsconvert.service.UrlService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 @RestController
@@ -32,16 +27,8 @@ public class UrlRestController {
     private CustomerRepository customerRepository;
 
     @GetMapping
-    public ResponseEntity<Set<Url>> getAllUrl(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        Optional<Customer> customerOptional = customerRepository.findByEmail(email).stream().findFirst();
-        if(!customerOptional.isPresent()){
-            return ResponseEntity.notFound().build();
-        }
-        Customer customer = customerOptional.get();
-        Set<Url> urlList = customer.getUrls();
-        return ResponseEntity.ok(urlList);
+    public ResponseEntity<Set<Map<String, String>>> getAllUrl(){
+        return ResponseEntity.ok(urlService.getUrlHistoryByEmail());
     }
 
     @PostMapping("/md5")
@@ -64,11 +51,6 @@ public class UrlRestController {
 
     @GetMapping("/{shortUrl}") //HttpServletResponse response response.sendRedirect
     public void getLongUrl(@PathVariable String shortUrl, HttpServletResponse response) throws IOException {
-        String url = urlService.decodeLongUrl(shortUrl);
-        if (url == null){
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "URL not found");
-        } else {
-            response.sendRedirect(url);
-        }
+        response.sendRedirect(urlService.decodeLongUrl(shortUrl));
     }
 }
