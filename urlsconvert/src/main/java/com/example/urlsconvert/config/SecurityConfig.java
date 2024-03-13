@@ -3,7 +3,6 @@ package com.example.urlsconvert.config;
 import com.example.urlsconvert.filter.FilterChainExceptionHandler;
 import com.example.urlsconvert.filter.JwtAuthenticationEntryPoint;
 import com.example.urlsconvert.filter.JwtRequestFilter;
-import com.example.urlsconvert.filter.RateLimitFilter;
 import com.example.urlsconvert.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -41,8 +40,7 @@ public class SecurityConfig {
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     @Autowired
     private FilterChainExceptionHandler filterChainExceptionHandler;
-    @Autowired
-    private RateLimitFilter rateLimitFilter;
+
 
     // SecurityFilterChain bean definition
     @Bean
@@ -56,7 +54,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 // Add JWT request filter
-                .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
+                //.addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(filterChainExceptionHandler, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtRequestFilter(), UsernamePasswordAuthenticationFilter.class);
 

@@ -2,6 +2,7 @@ package com.example.urlsconvert.rest.controller;
 
 import com.example.urlsconvert.entity.Customer;
 import com.example.urlsconvert.dao.CustomerRepository;
+import com.example.urlsconvert.ratelimiter.RateLimited;
 import com.example.urlsconvert.rest.CustomAuthenticationException;
 import com.example.urlsconvert.rest.RegistrationException;
 import com.example.urlsconvert.utils.JwtUtil;
@@ -34,6 +35,7 @@ public class LoginController {
     private JwtUtil jwtUtil;
 
     @GetMapping("/register")
+    @RateLimited
     public String getRegister(){
         return "register";
     }

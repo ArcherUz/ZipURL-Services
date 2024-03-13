@@ -29,10 +29,7 @@ dependencies {
     implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.0.3'
     implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.6.15'
     implementation 'org.flywaydb:flyway-core'
-//    //compile "io.github.resilience4j:resilience4j-spring-boot2:${resilience4jVersion}"
-//    implementation "io.github.resilience4j:resilience4j-ratelimiter:2.1.0"
-//    implementation('org.springframework.boot:spring-boot-starter-actuator')
-//    implementation('org.springframework.boot:spring-boot-starter-aop')
+    implementation('org.springframework.boot:spring-boot-starter-aop')
 
     implementation 'com.bucket4j:bucket4j-core:8.8.0'
 
