@@ -23,5 +23,7 @@ public class RateLimitIntegrationTest {
         }
 
         mockMvc.perform(get(("/register"))).andExpect(status().isTooManyRequests());
+        mockMvc.perform(get(("/register"))).andExpect(status().isTooManyRequests());
+        mockMvc.perform(get(("/register"))).andExpect(status().isTooManyRequests());
     }
 }
