@@ -7,6 +7,9 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface RateLimited {
+public @interface RateLimit {
+    int capacity();
+    int refillTime();
+    int refillAmount();
 
 }

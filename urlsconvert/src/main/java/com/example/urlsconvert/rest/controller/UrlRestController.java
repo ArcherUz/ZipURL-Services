@@ -2,7 +2,7 @@ package com.example.urlsconvert.rest.controller;
 
 import com.example.urlsconvert.dao.CustomerRepository;
 import com.example.urlsconvert.entity.UrlLongToShort;
-import com.example.urlsconvert.ratelimiter.RateLimited;
+import com.example.urlsconvert.ratelimiter.RateLimit;
 import com.example.urlsconvert.service.UrlRequestDTO;
 import com.example.urlsconvert.service.UrlService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,21 +33,21 @@ public class UrlRestController {
     }
 
     @PostMapping("/md5")
-    @RateLimited
+    @RateLimit(capacity = 10, refillTime = 60, refillAmount = 1)
     public ResponseEntity<Map<String, String>> encodeLongUrlByMD5(@RequestBody UrlRequestDTO urlRequestDTO){
         Map<String, String> result = urlService.encodeShortUrlByMD5(urlRequestDTO.getLongUrl());
         return ResponseEntity.ok(result);
     }
 
     @PostMapping("/base64")
-    @RateLimited
+    @RateLimit(capacity = 10, refillTime = 60, refillAmount = 1)
     public ResponseEntity<Map<String, String>> encodeLongUrlByBase64(@RequestBody UrlRequestDTO urlRequestDTO){
         Map<String, String> result = urlService.encodeShortUrlByBase64(urlRequestDTO.getLongUrl());
         return ResponseEntity.ok(result);
     }
 
     @PostMapping("/base62")
-    @RateLimited
+    @RateLimit(capacity = 10, refillTime = 60, refillAmount = 1)
     public ResponseEntity<Map<String, String>> encodeLongUrlByBase62(@RequestBody UrlRequestDTO urlRequestDTO){
         Map<String, String> result = urlService.encodeShortUrlByBase62(urlRequestDTO.getLongUrl());
         return ResponseEntity.ok(result);
