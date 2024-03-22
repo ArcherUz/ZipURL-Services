@@ -41,6 +41,7 @@ public class SecurityConfig {
     @Autowired
     private FilterChainExceptionHandler filterChainExceptionHandler;
 
+
     // SecurityFilterChain bean definition
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -50,11 +51,10 @@ public class SecurityConfig {
                         .requestMatchers("/register","/login","/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**","/api/urls/{shortUrl}").permitAll()
                         .requestMatchers("/api/urls", "/api/urls/**").authenticated()
                 )
-//                .formLogin().disable() // Disabling form login as we use JWT
-//                .httpBasic().disable() // Disabling basic auth as well
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 // Add JWT request filter
+                //.addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(filterChainExceptionHandler, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtRequestFilter(), UsernamePasswordAuthenticationFilter.class);
 

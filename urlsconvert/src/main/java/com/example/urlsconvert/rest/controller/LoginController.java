@@ -2,6 +2,7 @@ package com.example.urlsconvert.rest.controller;
 
 import com.example.urlsconvert.entity.Customer;
 import com.example.urlsconvert.dao.CustomerRepository;
+import com.example.urlsconvert.ratelimiter.RateLimit;
 import com.example.urlsconvert.rest.CustomAuthenticationException;
 import com.example.urlsconvert.rest.RegistrationException;
 import com.example.urlsconvert.utils.JwtUtil;
@@ -34,6 +35,7 @@ public class LoginController {
     private JwtUtil jwtUtil;
 
     @GetMapping("/register")
+    @RateLimit(capacity = 10, refillTime = 60, refillAmount = 1)
     public String getRegister(){
         return "register";
     }
@@ -44,6 +46,7 @@ public class LoginController {
     }
 
     @PostMapping("/register")
+    @RateLimit(capacity = 10, refillTime = 60, refillAmount = 1)
     public ResponseEntity<String> registerUser(@RequestBody Customer customer){
         if(customer.getEmail() == null || customer.getEmail().isEmpty() || !customerRepository.findByEmail(customer.getEmail()).isEmpty()){
             //throw new RegistrationException("Email is already in use or invalid.");
