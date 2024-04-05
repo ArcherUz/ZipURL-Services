@@ -1,14 +1,12 @@
-package com.example.urlsconvert.config;
-
-import org.springframework.stereotype.Component;
+package com.example.urlsconvert.utils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
 public class UrlValidation {
-    public static boolean isValidUrl(String urlString){
+    public static boolean isValidUrl(String url){
         try{
-            new URL(urlString);
+            new URL(url);
             return true;
         } catch (MalformedURLException e){
             return false;

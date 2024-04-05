@@ -1,6 +1,6 @@
-package com.example.urlsconvert.service;
+package com.example.urlsconvert.entity;
 
-public class UrlRequestDTO {
+public class UrlRequestDto {
     private String longUrl;
 
     public String getLongUrl(){
