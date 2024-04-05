@@ -16,4 +16,5 @@ dependencies {
 //    implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.6.15'
     //implementation 'org.flywaydb:flyway-core'
     implementation('org.springframework.boot:spring-boot-starter-aop')
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 }
