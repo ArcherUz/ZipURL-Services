@@ -1,3 +1,4 @@
 rootProject.name = 'url-microservices'
 include 'urlsconvert'
+include 'discovery-server'
 
