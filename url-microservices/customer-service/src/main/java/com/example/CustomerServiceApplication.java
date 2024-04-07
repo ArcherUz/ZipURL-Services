@@ -1,16 +1,13 @@
-package com.example.urlsconvert;
+package com.example;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @SpringBootApplication
-//@EnableCaching
 @EnableDiscoveryClient
-public class UrlsconvertApplication {
-
+public class CustomerServiceApplication {
     public static void main(String[] args) {
-        SpringApplication.run(UrlsconvertApplication.class, args);
+        SpringApplication.run(CustomerServiceApplication.class, args);
     }
-
 }

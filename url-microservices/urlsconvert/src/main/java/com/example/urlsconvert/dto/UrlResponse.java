@@ -15,6 +15,7 @@ import java.util.Map;
 @NoArgsConstructor
 @Builder
 public class UrlResponse{
+    private Long id;
     private String longUrl;
     private String encodeUrl;
     private String title;

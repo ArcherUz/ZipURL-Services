@@ -6,10 +6,8 @@ import com.example.urlsconvert.dto.UrlResponse;
 import com.example.urlsconvert.entity.UrlLongToShort;
 import com.example.urlsconvert.exception.UrlException;
 import com.example.urlsconvert.repository.UrlLongToShortRepository;
-import com.example.urlsconvert.service.UrlService;
 import com.example.urlsconvert.utils.UrlValidation;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,8 +16,6 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,7 +44,7 @@ public class UrlServiceImpl implements UrlService {
             String avatar = getUrlAvatar(longUrl);
             UrlLongToShort url = createOrUpdateUrl(longUrl, sb.toString(), title, avatar);
 
-            UrlResponse urlResponse = UrlResponse.builder().longUrl(longUrl).encodeUrl(sb.toString()).title(title).avatar(avatar).build();
+            UrlResponse urlResponse = UrlResponse.builder().id(url.getId()).longUrl(longUrl).encodeUrl(sb.toString()).title(title).avatar(avatar).build();
             return urlResponse;
 
         } catch (NoSuchAlgorithmException e){
@@ -68,7 +64,7 @@ public class UrlServiceImpl implements UrlService {
         String avatar = getUrlAvatar(longUrl);
         UrlLongToShort url = createOrUpdateUrl(longUrl, encoded, title, avatar);
 
-        UrlResponse urlResponse = UrlResponse.builder().longUrl(longUrl).encodeUrl(encoded).title(title).avatar(avatar).build();
+        UrlResponse urlResponse = UrlResponse.builder().id(url.getId()).longUrl(longUrl).encodeUrl(encoded).title(title).avatar(avatar).build();
         return urlResponse;
     }
 
@@ -87,7 +83,7 @@ public class UrlServiceImpl implements UrlService {
         String title = getUrlTitle(longUrl);
         String avatar = getUrlAvatar(longUrl);
         UrlLongToShort url = createOrUpdateUrl(longUrl, sb.toString(), title, avatar);
-        UrlResponse urlResponse = UrlResponse.builder().longUrl(longUrl).encodeUrl(sb.toString()).title(title).avatar(avatar).build();
+        UrlResponse urlResponse = UrlResponse.builder().id(url.getId()).longUrl(longUrl).encodeUrl(sb.toString()).title(title).avatar(avatar).build();
         return urlResponse;
     }
 
