@@ -1,22 +1,26 @@
 package com.example.service;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import com.example.entity.Customer;
+import com.example.repository.CustomerRepository;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-
-import org.springframework.http.HttpHeaders;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@Transactional
 public class CustomerService {
+    private final CustomerRepository customerRepository;
+    public CustomerService(CustomerRepository customerRepository){
+        this.customerRepository = customerRepository;
+    }
     public ResponseEntity<String> registerCustomer(String email, String password){
         String accessToken = getAdminAccessToken();
         RestTemplate restTemplate = new RestTemplate();
@@ -43,6 +47,10 @@ public class CustomerService {
         } catch (HttpClientErrorException e){
             return ResponseEntity.status(e.getStatusCode()).body(e.getMessage());
         }
+
+        Customer customer = new Customer();
+        customer.setEmail(email);
+        customerRepository.save(customer);
 
         return login(email, password);
     }
@@ -86,5 +94,7 @@ public class CustomerService {
         ResponseEntity<Map> response = restTemplate.postForEntity(tokenUrl, request, Map.class);
         return response.getBody().get("access_token").toString();
     }
+
+
 
 }

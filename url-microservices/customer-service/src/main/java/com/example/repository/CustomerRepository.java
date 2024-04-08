@@ -1,8 +1,11 @@
 package com.example.repository;
 
 
-//import org.springframework.data.jpa.repository.JpaRepository;
+import com.example.entity.Customer;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-//public interface CustomerRepository extends JpaRepository<Customer, Long> {
-//    Customer findByEmail(String email);
-//}
+import java.util.Optional;
+
+public interface CustomerRepository extends JpaRepository<Customer, Long> {
+    Optional<Customer> findByEmail(String email);
+}
