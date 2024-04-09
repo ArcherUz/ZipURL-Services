@@ -5,6 +5,9 @@ import com.example.dto.UrlRequestDto;
 import com.example.dto.UrlResponseDto;
 import com.example.service.CustomerEncodeUrlService;
 import com.example.service.CustomerService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
+import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -13,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/user")
@@ -33,21 +38,15 @@ public class CustomerController {
         return customerService.login(customerRequestDto.getEmail(), customerRequestDto.getPassword());
     }
 
-//    @PostMapping("/encode/md5")
-//    public Mono<ResponseEntity<UrlResponseDto>> userEncodeMd5(@RequestBody String longUrl){
-//        return customerEncodeUrlService.fetchEncodeUrlByMD5(longUrl);
-//    }
-
     @PostMapping("/encode/md5")
-    public Mono<UrlResponseDto> encodeUrlByMD5(@RequestBody UrlRequestDto urlRequestDTO, @RequestHeader("Authorization") String authorizationHeader) {
-//        WebClient webClient = webClientBuilder.build();
-//
-//        return webClient.post()
-//                .uri("http://urlsconvert/api/urls/md5")
-//                .header("Authorization", authorizationHeader)
-//                .bodyValue(urlRequestDTO)
-//                .retrieve()
-//                .bodyToMono(UrlResponseDto.class);
-        return customerEncodeUrlService.fetchEncodeUrlByMD5(urlRequestDTO, authorizationHeader);
+    @CircuitBreaker(name = "urlsconvert", fallbackMethod = "fallbackMethod")
+    @TimeLimiter(name = "urlsconvert")
+    @Retry(name = "urlsconvert")
+    public CompletableFuture<UrlResponseDto> encodeUrlByBase62(@RequestBody UrlRequestDto urlRequestDTO, @RequestHeader("Authorization") String authorizationHeader) {
+        return CompletableFuture.supplyAsync(() -> customerEncodeUrlService.fetchEncodeUrlByBase62(urlRequestDTO, authorizationHeader)) ;
+    }
+
+    public CompletableFuture<String> fallbackMethod(UrlRequestDto urlRequestDto, RuntimeException runtimeException){
+        return CompletableFuture.supplyAsync(() -> "Oops! Something went wrong, please try again later");
     }
 }

@@ -2,16 +2,14 @@ package com.example.service;
 
 import com.example.dto.UrlRequestDto;
 import com.example.dto.UrlResponseDto;
-import com.example.entity.Customer;
+import com.example.event.EncodeUrlEvent;
 import com.example.repository.CustomerRepository;
-import com.netflix.discovery.EurekaClient;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 @Service
@@ -19,24 +17,30 @@ public class CustomerEncodeUrlService {
     private final CustomerRepository customerRepository;
     private final WebClient.Builder webClientBuilder;
     private final JwtDecoder jwtDecoder;
+    private final KafkaTemplate<String, EncodeUrlEvent> kafkaTemplate;
 
 
-    public CustomerEncodeUrlService (CustomerRepository customerRepository, WebClient.Builder webClientBuilder, JwtDecoder jwtDecoder){
+    public CustomerEncodeUrlService (CustomerRepository customerRepository, WebClient.Builder webClientBuilder, JwtDecoder jwtDecoder, KafkaTemplate kafkaTemplate){
         this.customerRepository = customerRepository;
         this.webClientBuilder = webClientBuilder;
         this.jwtDecoder = jwtDecoder;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
-    public Mono<UrlResponseDto> fetchEncodeUrlByMD5(UrlRequestDto urlRequestDTO, String authorizationHeader) {
+    public UrlResponseDto fetchEncodeUrlByBase62(UrlRequestDto urlRequestDTO, String authorizationHeader) {
         String email = extractEmailFromJWT(authorizationHeader);
         WebClient webClient = webClientBuilder.build();
-        return webClient.post()
-                .uri("http://urlsconvert/api/urls/md5")
+        UrlResponseDto urlResponseDto = webClient.post()
+                .uri("http://urlsconvert/api/urls/base62")
                 .header("Authorization", authorizationHeader)
                 .bodyValue(urlRequestDTO)
                 .retrieve()
                 .bodyToMono(UrlResponseDto.class)
-                .doOnNext(response -> updateCustomerUrlHistory(email, urlRequestDTO.getLongUrl()));
+                .doOnNext(response -> updateCustomerUrlHistory(email, urlRequestDTO.getLongUrl()))
+                .block();
+
+        kafkaTemplate.send("notificationTopic", new EncodeUrlEvent(urlResponseDto.getEncodeUrl()));
+        return urlResponseDto;
     }
 
     private String  extractEmailFromJWT(String jwtToken){

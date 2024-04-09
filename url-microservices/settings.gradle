@@ -3,4 +3,5 @@ include 'urlsconvert'
 include 'discovery-server'
 include 'api-gateway'
 include 'customer-service'
+include 'notification-service'
 
