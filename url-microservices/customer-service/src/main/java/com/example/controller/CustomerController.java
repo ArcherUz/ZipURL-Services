@@ -38,7 +38,7 @@ public class CustomerController {
         return customerService.login(customerRequestDto.getEmail(), customerRequestDto.getPassword());
     }
 
-    @PostMapping("/encode/md5")
+    @PostMapping("/encode/base62")
     @CircuitBreaker(name = "urlsconvert", fallbackMethod = "fallbackMethod")
     @TimeLimiter(name = "urlsconvert")
     @Retry(name = "urlsconvert")
@@ -46,7 +46,9 @@ public class CustomerController {
         return CompletableFuture.supplyAsync(() -> customerEncodeUrlService.fetchEncodeUrlByBase62(urlRequestDTO, authorizationHeader)) ;
     }
 
-    public CompletableFuture<String> fallbackMethod(UrlRequestDto urlRequestDto, RuntimeException runtimeException){
-        return CompletableFuture.supplyAsync(() -> "Oops! Something went wrong, please try again later");
+    public CompletableFuture<UrlResponseDto> fallbackMethod(UrlRequestDto urlRequestDto, RuntimeException runtimeException){
+        UrlResponseDto errorResponse  = new UrlResponseDto();
+        errorResponse.setEncodeUrl("Oops! Something went wrong, please try again later");
+        return CompletableFuture.completedFuture(errorResponse);
     }
 }

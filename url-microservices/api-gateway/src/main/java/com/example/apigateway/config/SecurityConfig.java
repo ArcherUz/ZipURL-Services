@@ -2,6 +2,7 @@ package com.example.apigateway.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -14,7 +15,9 @@ public class SecurityConfig {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity serverHttpSecurity){
         serverHttpSecurity.csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange ->
-                        exchange.pathMatchers("/eureka/**", "/user/login", "/user/register")
+                        exchange
+                                .pathMatchers(HttpMethod.GET, "/api/urls/**"). permitAll()
+                                .pathMatchers("/eureka/**", "/user/login", "/user/register")
                                 .permitAll()
                                 .anyExchange()
                                 .authenticated())

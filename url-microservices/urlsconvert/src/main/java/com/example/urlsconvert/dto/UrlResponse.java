@@ -28,10 +28,10 @@ public class UrlResponse{
     }
 
     private String getBaseUrl() {
-        ServletRequestAttributes sra = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (sra != null) {
-            return ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/api/urls/";
-        }
+//        ServletRequestAttributes sra = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+//        if (sra != null) {
+//            return ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/api/urls/";
+//        }
         // Default URL or throw an exception if the context is not available
         return "http://localhost:8080/api/urls/";
     }

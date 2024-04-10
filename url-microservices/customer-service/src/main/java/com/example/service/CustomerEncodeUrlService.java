@@ -39,7 +39,7 @@ public class CustomerEncodeUrlService {
                 .doOnNext(response -> updateCustomerUrlHistory(email, urlRequestDTO.getLongUrl()))
                 .block();
 
-        kafkaTemplate.send("notificationTopic", new EncodeUrlEvent(urlResponseDto.getEncodeUrl()));
+        kafkaTemplate.send("notificationTopic", new EncodeUrlEvent(urlResponseDto.getEncodeUrl(), email));
         return urlResponseDto;
     }
 

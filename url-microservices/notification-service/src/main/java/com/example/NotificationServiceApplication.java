@@ -16,6 +16,6 @@ public class NotificationServiceApplication {
 
     @KafkaListener(topics = "notificationTopic")
     public void handleNotification(EncodeUrlEvent encodeUrlEvent){
-        log.info("Received encoded URL : " + encodeUrlEvent.getEncodedUrl());
+        log.info("Received encoded URL : " + encodeUrlEvent.getEncodedUrl() + ", Email at : " + encodeUrlEvent.getEmail());
     }
 }

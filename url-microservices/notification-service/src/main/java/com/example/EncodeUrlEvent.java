@@ -9,4 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class EncodeUrlEvent {
     private String encodedUrl;
+    private String email;
 }

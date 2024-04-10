@@ -10,4 +10,5 @@ import org.apache.kafka.common.protocol.types.Field;
 @NoArgsConstructor
 public class EncodeUrlEvent {
     private String encodedUrl;
+    private String email;
 }
