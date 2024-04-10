@@ -48,5 +48,9 @@ public class UrlController {
         response.sendRedirect(urlService.decodeLongUrl(shortUrl));
     }
 
+    @PostMapping("/ids")
+    public List<UrlResponse> getUrlByListId(@RequestBody List<String> ids){
+        return urlService.findUrlByListId(ids);
+    }
 
 }

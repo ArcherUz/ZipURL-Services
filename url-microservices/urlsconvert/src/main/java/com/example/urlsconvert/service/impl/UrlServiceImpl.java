@@ -16,9 +16,11 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class UrlServiceImpl implements UrlService {
@@ -94,6 +96,24 @@ public class UrlServiceImpl implements UrlService {
             throw new UrlException(HttpStatus.NOT_FOUND, "Short url does not found: " + shortUrl);
         }
         return urlOptional.get().getLongUrl();
+    }
+
+    @Override
+    public List<UrlResponse> findUrlByListId(List<String> ids) {
+        List<UrlResponse> responses = ids.stream()
+            .map(id -> urlLongToShortRepository.findById(Long.parseLong(id)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(url -> UrlResponse.builder()
+                        .id(url.getId())
+                        .longUrl(url.getLongUrl())
+                        .encodeUrl(url.getShortUrl())
+                        .title(url.getTitle())
+                        .avatar(url.getAvatar())
+                        .build()).toList();
+
+        return responses;
+
     }
 
     private String getUrlTitle(String url){

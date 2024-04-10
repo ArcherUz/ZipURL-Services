@@ -46,7 +46,7 @@ public class CustomerController {
         return CompletableFuture.supplyAsync(() -> customerEncodeUrlService.fetchEncodeUrlByBase62(urlRequestDTO, authorizationHeader)) ;
     }
 
-    public CompletableFuture<UrlResponseDto> fallbackMethod(UrlRequestDto urlRequestDto, RuntimeException runtimeException){
+    public CompletableFuture<UrlResponseDto> fallbackMethod(UrlRequestDto urlRequestDto, RuntimeException runtimeException, Throwable throwable){
         UrlResponseDto errorResponse  = new UrlResponseDto();
         errorResponse.setEncodeUrl("Oops! Something went wrong, please try again later");
         return CompletableFuture.completedFuture(errorResponse);
